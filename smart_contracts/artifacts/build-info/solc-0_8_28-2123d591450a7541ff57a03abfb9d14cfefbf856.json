@@ -1,0 +1,35 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-2123d591450a7541ff57a03abfb9d14cfefbf856",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/ProductVerification.sol": "project/contracts/ProductVerification.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/ProductVerification.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\ncontract ProductVerification {\r\n    \r\n    struct Product {\r\n        string serialNumber;\r\n        string productHash;\r\n        address company;\r\n        uint256 timestamp;\r\n        bool isRegistered;\r\n    }\r\n    \r\n    mapping(string => Product) private products;\r\n    \r\n    // Event emitted when a new product is added\r\n    event ProductAdded(string indexed serialNumber, string productHash, address indexed company, uint256 timestamp);\r\n    \r\n    // Register a new product\r\n    function registerProduct(string memory _serialNumber, string memory _productHash) public {\r\n        require(!products[_serialNumber].isRegistered, \"Product serial number already registered.\");\r\n        \r\n        products[_serialNumber] = Product({\r\n            serialNumber: _serialNumber,\r\n            productHash: _productHash,\r\n            company: msg.sender,\r\n            timestamp: block.timestamp,\r\n            isRegistered: true\r\n        });\r\n        \r\n        emit ProductAdded(_serialNumber, _productHash, msg.sender, block.timestamp);\r\n    }\r\n    \r\n    // Verify a product\r\n    function verifyProduct(string memory _serialNumber) public view returns (bool isRegistered, string memory productHash, address company, uint256 timestamp) {\r\n        require(products[_serialNumber].isRegistered, \"Product not found.\");\r\n        \r\n        Product memory p = products[_serialNumber];\r\n        return (p.isRegistered, p.productHash, p.company, p.timestamp);\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}
