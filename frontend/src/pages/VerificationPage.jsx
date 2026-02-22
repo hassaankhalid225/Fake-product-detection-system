@@ -57,7 +57,7 @@ const VerificationPage = () => {
         setResult(null);
 
         try {
-            const res = await axios.post(`http://localhost:5000/api/verify/${serial}`);
+            const res = await axios.post(`https://fake-product-detection-system-three.vercel.app/api/verify/${serial}`);
             setResult({ status: 'success', data: res.data });
         } catch (err) {
             setResult({

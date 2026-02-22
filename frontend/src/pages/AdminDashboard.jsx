@@ -16,7 +16,7 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
         try {
             // In a real app we'd pass headers: Authorization: Bearer token
-            const res = await axios.get('http://localhost:5000/api/analytics/stats');
+            const res = await axios.get('https://fake-product-detection-system-three.vercel.app/api/analytics/stats');
             setStats(res.data);
         } catch (err) {
             console.error(err);

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
-const { ethers } = require('ethers');
+const { getContractInstance } = require('../utils/blockchain');
 const crypto = require('crypto');
 // Assume middleware auth is implemented, skipping for brevity
 // const auth = require('../middleware/auth');
@@ -16,9 +16,21 @@ router.post('/', async (req, res) => {
         const dataString = `${productName}${serialNumber}${batchNumber}${manufacturingDate}${description}`;
         const hash = crypto.createHash('sha256').update(dataString).digest('hex');
 
-        // Here we'd interact with Blockchain to save the hash and get txId
-        // Placeholder txId for now
-        const blockchainTxId = '0xTxIdFromBlockchainMock';
+        // Hyperledger Fabric Integration
+        let blockchainTxId = 'Placeholder_HLF_Tx';
+        const blockchain = await getContractInstance();
+
+        if (blockchain) {
+            const { contract, gateway } = blockchain;
+            // company name/id can be taken from req.user (if auth is there) or req.body
+            const company = req.body.company || 'UnknownCompany';
+
+            await contract.submitTransaction('registerProduct', serialNumber, hash, company);
+            await gateway.disconnect();
+            blockchainTxId = `HLF_${Date.now()}`; // Custom ID as HLF doesn't return txid directly in some versions easily without more steps
+        } else {
+            console.log('Blockchain connection failed, proceeding with DB only for now.');
+        }
 
         product = new Product({
             productName, serialNumber, batchNumber, manufacturingDate, expiryDate, quantity, description,

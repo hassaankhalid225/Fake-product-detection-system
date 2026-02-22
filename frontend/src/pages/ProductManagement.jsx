@@ -22,7 +22,7 @@ const ProductManagement = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/products');
+            const res = await axios.get('https://fake-product-detection-system-three.vercel.app/api/products');
             setProducts(res.data);
         } catch (err) {
             console.error(err);
@@ -39,7 +39,7 @@ const ProductManagement = () => {
         setMessage({ type: '', text: '' });
 
         try {
-            const res = await axios.post('http://localhost:5000/api/products', formData);
+            const res = await axios.post('https://fake-product-detection-system-three.vercel.app/api/products', formData);
             setMessage({ type: 'success', text: `Product registered securely on Blockchain! Tx: ${res.data.blockchainTxId}` });
             setFormData({ productName: '', serialNumber: '', batchNumber: '', manufacturingDate: '', quantity: '', description: '' });
             fetchProducts();

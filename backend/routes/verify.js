@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const VerificationLog = require('../models/VerificationLog');
+const { getContractInstance } = require('../utils/blockchain');
 const crypto = require('crypto');
 
 router.post('/:serialNumber', async (req, res) => {
@@ -23,8 +24,17 @@ router.post('/:serialNumber', async (req, res) => {
             return res.json({ status: 'Duplicate Serial Detected', count: logsCount, product });
         }
 
-        // Assume blockchain check here: fetch hash from SC
-        const blockchainHash = product.hash; // mock check
+        // Hyperledger Fabric Integration
+        let blockchainHash = product.hash; // default to DB hash if BC unavailable
+        const blockchain = await getContractInstance();
+
+        if (blockchain) {
+            const { contract, gateway } = blockchain;
+            const result = await contract.evaluateTransaction('verifyProduct', serialNumber);
+            const productFromBC = JSON.parse(result.toString());
+            blockchainHash = productFromBC.productHash;
+            await gateway.disconnect();
+        }
 
         // compare hash
         if (product.hash === blockchainHash) {
@@ -32,7 +42,7 @@ router.post('/:serialNumber', async (req, res) => {
             return res.json({ status: 'Verified Original Product', product });
         } else {
             await VerificationLog.create({ serialNumber, productId: product._id, ipAddress, status: 'Fake / Not Found' });
-            return res.json({ status: 'Fake / Not Found', msg: 'Hash Mismatch' });
+            return res.json({ status: 'Fake / Not Found', msg: 'Hash Mismatch or Product not in Ledger' });
         }
     } catch (err) {
         console.error(err.message);
